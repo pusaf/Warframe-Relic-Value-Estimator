@@ -10,7 +10,7 @@ Install dependencies using:
 pip install BeautifulSoup4 requests
 ```
 
-###Usage
+### Usage
 ```
 python main.py
 ```
