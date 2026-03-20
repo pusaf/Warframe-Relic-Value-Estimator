@@ -2,10 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
-## Base URLs
-relic_wiki = "https://wiki.warframe.com/w/Void_Relic"
-warframe_market = "https://api.warframe.market/v2/"
 
+## Base URLs
+RELIC_WIKI = "https://wiki.warframe.com/w/Void_Relic"
+
+## Important constants
+CSV_HEADER = "Type, Relic Name, Count"
 
 ## verify_relic: Str -> anyof(False, -1, [Str, Str])
 ## Produces false if name is not the name of a relic 
@@ -17,34 +19,23 @@ def verify_relic(name):
     result = False
 
     try:
-        relic_list = open('relic_list.txt', "r")
+        relic_list = open('relic_list.csv', "r")
     except:
         return -1
     
-    tempLine = relic_list.readline()
-    if tempLine == None:
+    firstLine = relic_list.readline().strip()
+    if firstLine != CSV_HEADER.strip():
         return -1
-    unvault_count = int(tempLine.split()[-1])
-    vault_count = int(relic_list.readline().split()[-1])
-    kiteer_count = int(relic_list.readline().split()[-1])
 
-    count = 0
-    relic_name = relic_list.readline().strip()
-    while (relic_name != ""):
-        count += 1
-
+    relic = relic_list.readline().strip().split(",")
+    while (relic != [""]):
+        relic_type = relic[0]
+        relic_name = relic[1]
         if relic_name.lower().replace(" ","") == formatted:
             result = [relic_name]
-            if count <= unvault_count:
-                result.append("Unvaulted")
-            elif count <= unvault_count + vault_count:
-                result.append("Vaulted")
-            else:
-                result.append("Ki'teer")
+            result.append(relic_type)
             break
-        
-        relic_name = relic_list.readline().strip()
-
+        relic = relic_list.readline().strip().split(",")
 
     relic_list.close()
     return result
@@ -54,15 +45,11 @@ def verify_relic(name):
 
 
 ## update_relic_list: None -> None
-## Updates the file relic_list.txt with the name of all non requiem relics in the game according to the wiki
+## Updates the file relic_list.csv with all non requiem relics in the game according to the wiki
 def update_relic_list():
-    relic_list = open('relic_list.txt', 'w')
+    relic_list = open('relic_list.csv', 'w')
     temp_relic_list = []
-    vault_count = 0
-    unvault_count = 0
-    kiteer_count = 0
-
-    url = relic_wiki
+    url = RELIC_WIKI
     r = requests.get(url)
     soup = BeautifulSoup(r.content, "html.parser")
     
@@ -85,30 +72,25 @@ def update_relic_list():
     for era in unvaulted_eras:
         relic_names = era.find_all("li")
         for name in relic_names:
-            temp_relic_list.append(name.find("span")["data-param-name"] + "\n")
-            unvault_count += 1
+            temp_relic_list.append("Unvaulted," + name.find("span")["data-param-name"] + "\n")
     
     ## Write the vaulted relics into relic list
     vaulted_eras = vaulted_table.find_all("td")[:4]
     for era in vaulted_eras:
         relic_names = era.find_all("li")
         for name in relic_names:
-            temp_relic_list.append(name.find("span")["data-param-name"] + "\n")
-            vault_count += 1
+            temp_relic_list.append("Vaulted," + name.find("span")["data-param-name"] + "\n")
 
     ## Write the ki'teer relics into relic list
     kiteer_eras = kiteer_table.find_all("td")[:4]
     for era in kiteer_eras:
         relic_names = era.find_all("li")
         for name in relic_names:
-            temp_relic_list.append(name.find("span")["data-param-name"] + "\n")
-            kiteer_count += 1
+            temp_relic_list.append("Ki'teer," + name.find("span")["data-param-name"] + "\n")
 
-    relic_list.write("Unvaulted Relics: " + str(unvault_count) + "\nVaulted Relics: " + str(vault_count) + "\nKi'Teer Relics: " + str(kiteer_count) + "\n")
-
+    relic_list.write(CSV_HEADER + "\n")
     for name in temp_relic_list:
         relic_list.write(name)
     relic_list.close()
         
-
 

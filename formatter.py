@@ -1,5 +1,3 @@
-
-
 ## build_string_format: Str Str [Float, Float, Float, Float] -> Str
 ## Formats the information given into a returned string
 def build_string_format(name, type, values):

@@ -14,15 +14,15 @@ DROP_COUNT = 6
 
 
 ## Base URLs
-warframe_wiki = "https://wiki.warframe.com/w/"
-warframe_market = "https://api.warframe.market/v2/"
+WARFRAME_WIKI = "https://wiki.warframe.com/w/"
+WARFRAME_MARKET = "https://api.warframe.market/v2/"
 
 
 ## get_drops: Str -> [Str, Str, Str, Str, Str, Str]
 ## Takes in a relic name (ex. Lith_D7) and returns its drops in order of low, medium then high rarity.
 def get_drops(relic):
     # Grab wiki page for chosen relic and find its droptable
-    url = warframe_wiki + relic
+    url = WARFRAME_WIKI + relic
     r = requests.get(url)
     soup = BeautifulSoup(r.content, "html.parser")
     droptable = soup.find(id="72656C6963table")
@@ -65,7 +65,7 @@ def expected_value(relic):
         
         # Make warframe.market API call and just get the sell order information
         item_top_order = "orders/item/" + drops[i] + "/top"
-        top_orders = requests.get(warframe_market + item_top_order)
+        top_orders = requests.get(WARFRAME_MARKET + item_top_order)
         data = json.loads(top_orders.text)
         sell_data = data["data"]["sell"]
 
