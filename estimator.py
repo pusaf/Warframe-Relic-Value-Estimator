@@ -30,8 +30,8 @@ def kompressa_bugfix(drop):
     Returns:
           str: Fixed drop name.
     """
-    if (drop == "kompressa_prime_reciever"):
-        return "kompressa_prime_receiver"
+    if (drop == "kompressa_prime_receiver"):
+        return "kompressa_prime_reciever"
     else:
         return drop
 
@@ -108,8 +108,7 @@ def expected_value(relic):
             continue
         
         # Make warframe.market API call and just get the sell order information
-        item_top_order = "orders/item/" + drops[i] + "/top"
-        print(item_top_order)
+        item_top_order = "orders/item/" + kompressa_bugfix(drops[i]) + "/top"
         top_orders = requests.get(WARFRAME_MARKET + item_top_order)
         data = json.loads(top_orders.text)
         sell_data = data["data"]["sell"]
