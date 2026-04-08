@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import time
+import sqlite3
 
 ## Important constants
 P_INTACT = [0.2533, 0.2533, 0.2533, 0.11, 0.11, 0.02]
@@ -20,33 +21,48 @@ WARFRAME_MARKET = "https://api.warframe.market/v2/"
 
 ## get_drops: Str -> [Str, Str, Str, Str, Str, Str]
 ## Takes in a relic name (ex. Lith_D7) and returns its drops in order of low, medium then high rarity.
+## Requires relic to be in the format "*Era* *Key*" (ex. "Lith D7") and in the relic_list table
 def get_drops(relic):
-    # Grab wiki page for chosen relic and find its droptable
-    url = WARFRAME_WIKI + relic
-    r = requests.get(url)
-    soup = BeautifulSoup(r.content, "html.parser")
-    droptable = soup.find(id="72656C6963table")
-    
-    # For each row, find the section that has the title and take its text, then append it to our list of drops.
-    drops = []
-    for row in droptable.find_all("tr"):
-        first_cell = row.find("td")
-        if first_cell == None:
-            continue
+    ## Check if drops are already saved in the table
+    con = sqlite3.connect("relics.db")
+    cursor = con.cursor()
+    drops_saved = cursor.execute("SELECT name, drop1, drop2, drop3, drop4, drop5, drop6 FROM relic_list WHERE name=? AND drop1 IS NOT NULL", (relic,)).fetchone()
 
-        titles = first_cell.find_all("a")
-        if titles == []:
-            continue
+    if not drops_saved:
+        # Grab wiki page for chosen relic and find its droptable
+        url = WARFRAME_WIKI + relic.replace(" ","_")
+        r = requests.get(url)
+        soup = BeautifulSoup(r.content, "html.parser")
+        droptable = soup.find(id="72656C6963table")
+        
+        # For each row, find the section that has the title and take its text, then append it to our list of drops.
+        drops = []
+        for row in droptable.find_all("tr"):
+            first_cell = row.find("td")
+            if first_cell == None:
+                continue
+            titles = first_cell.find_all("a")
+            if titles == []:
+                continue
+            drops.append(titles[-1].text.strip())
+        
+        # Save the drops to the database
+        cursor.execute("Update relic_list SET drop1=?, drop2=?, drop3=?, drop4=?, drop5=?, drop6=? WHERE name=?", 
+                       (drops[0],drops[1],drops[2],drops[3],drops[4],drops[5],relic))
+        con.commit()
 
-        drops.append(titles[-1].text.strip())
-    
-    return drops
-    
+        return drops
+    else:
+        drops = []
+        for i in range(1,7):
+            drops.append(drops_saved[i])
+        return drops
 
 
 ## expected_value: Str -> [Float, Float, Float, Float] 
 ## Takes in a relic, then calculates the expected plat value if cracked 
 ## Returns 4 values - in order, expected value for intact, exceptional, flawless, radiant
+## Requires relic to be in the format "*Era* *Key*" (ex. "Lith D7") and in the relic_list table
 def expected_value(relic):
     drops = get_drops(relic)
     for i in range(DROP_COUNT):
@@ -65,6 +81,7 @@ def expected_value(relic):
         
         # Make warframe.market API call and just get the sell order information
         item_top_order = "orders/item/" + drops[i] + "/top"
+        print(item_top_order)
         top_orders = requests.get(WARFRAME_MARKET + item_top_order)
         data = json.loads(top_orders.text)
         sell_data = data["data"]["sell"]
