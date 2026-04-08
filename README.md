@@ -14,4 +14,4 @@ pip install BeautifulSoup4 requests
 ```
 python main.py
 ```
-Follow the prompts to use the program. On first run, the program will automatically generate a list of relics (relic_list.csv) for you.
+Follow the prompts to use the program. On first run, the program will automatically generate a list of relics (relics.db) for you.

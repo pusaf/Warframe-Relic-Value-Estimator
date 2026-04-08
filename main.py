@@ -13,7 +13,7 @@ def main():
     print("\n")
 
     while True:
-        if not os.path.isfile("relic_list.txt"):
+        if not os.path.isfile("relics.db"):
             update_relic_list()
 
         user_input = input("Input relic name (stop to exit):  ")
