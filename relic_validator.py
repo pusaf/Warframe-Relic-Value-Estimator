@@ -15,6 +15,17 @@ RELIC_STATUSES = ["Unvaulted", "Vaulted", "Ki'teer"]
 ## if name is the name of a relic, modifies the string to be in the format "*Era* *Key*" (ex. "Lith D7")
 ## and returns whether it is vaulted, unvaulted or a baro relic
 def verify_relic(name):
+    """
+    Verifies and formats the names of relics.
+
+    Parameters:
+        name (str): Relic name.
+
+    Returns:
+           anyof [str, str], False: Produces false if name is not the name of a relic.
+                                    Otherwise, returns a modified string in the format "*Era* *Key*" (ex. "Lith C7")
+                                    and its status
+    """
     formatted = name.lower().replace(" ","").strip()
     result = False
 
@@ -28,10 +39,10 @@ def verify_relic(name):
     return result
 
 
-
-## update_relic_list: None -> None
-## Updates the the relic_list table with all non requiem relics in the game according to the wiki
 def update_relic_list():
+    """
+    Updates the relic_list table with all non requiem relics according to the wiki
+    """
     con = sqlite3.connect("relics.db")
     cursor = con.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS relic_list("
