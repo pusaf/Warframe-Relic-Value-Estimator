@@ -19,10 +19,33 @@ WARFRAME_WIKI = "https://wiki.warframe.com/w/"
 WARFRAME_MARKET = "https://api.warframe.market/v2/"
 
 
-## get_drops: Str -> [Str, Str, Str, Str, Str, Str]
-## Takes in a relic name (ex. Lith_D7) and returns its drops in order of low, medium then high rarity.
-## Requires relic to be in the format "*Era* *Key*" (ex. "Lith D7") and in the relic_list table
+def kompressa_bugfix(drop):
+    """
+    For some reason, the Kompressa Prime Receiver has been misspelled on warframe.market as Reciever
+    for over a month. This accounts for that issue and will be removed if it ever actually gets fixed.
+
+    Parameters:
+        drop (str): Drop name.
+
+    Returns:
+          str: Fixed drop name.
+    """
+    if (drop == "kompressa_prime_reciever"):
+        return "kompressa_prime_receiver"
+    else:
+        return drop
+
+
 def get_drops(relic):
+    """
+    Takes in a relic name (ex. Lith_D7) and returns its drops in order of low, medium then high rarity. 
+
+    Parameters:
+        relic (str): Relic name. Must be of the form "*Era* *Key*" (ex. Lith C7).
+
+    Returns:
+          [str, str, str, str, str, str]: A list of the relic's drops.
+    """
     ## Check if drops are already saved in the table
     con = sqlite3.connect("relics.db")
     cursor = con.cursor()
@@ -59,11 +82,16 @@ def get_drops(relic):
         return drops
 
 
-## expected_value: Str -> [Float, Float, Float, Float] 
-## Takes in a relic, then calculates the expected plat value if cracked 
-## Returns 4 values - in order, expected value for intact, exceptional, flawless, radiant
-## Requires relic to be in the format "*Era* *Key*" (ex. "Lith D7") and in the relic_list table
 def expected_value(relic):
+    """
+    Takes in a relic, then calculates the expected plat value if cracked.
+
+    Parameters:
+        relic (str): Relic name. Must be of the form "*Era* *Key*" (ex. Lith C7).
+
+    Returns:
+            [float, float, float, float]: In order, expected value for intact, exceptional, flawless and radiant refinements
+    """
     drops = get_drops(relic)
     for i in range(DROP_COUNT):
         drops[i] = drops[i].replace(" ", "_").lower()
