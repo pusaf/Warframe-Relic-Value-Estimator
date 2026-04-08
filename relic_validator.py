@@ -10,10 +10,6 @@ RELIC_WIKI = "https://wiki.warframe.com/w/Void_Relic"
 RELIC_STATUSES = ["Unvaulted", "Vaulted", "Ki'teer"]
 
 
-## verify_relic: Str -> anyof(False, [Str, Str])
-## Produces false if name is not the name of a relic 
-## if name is the name of a relic, modifies the string to be in the format "*Era* *Key*" (ex. "Lith D7")
-## and returns whether it is vaulted, unvaulted or a baro relic
 def verify_relic(name):
     """
     Verifies and formats the names of relics.
