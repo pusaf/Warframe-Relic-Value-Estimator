@@ -36,6 +36,7 @@ def kompressa_bugfix(drop):
         return drop
 
 
+
 def get_drops(relic):
     """
     Takes in a relic name (ex. Lith_D7) and returns its drops in order of low, medium then high rarity. 
@@ -100,7 +101,7 @@ def expected_value(relic):
 
     # Get top 3 orders for each item and average out their price
     for i in range(DROP_COUNT):
-        if drops[i] == "forma_blueprint":
+        if "forma" in drops[i]:
             if i >= 3:
                 prices.append(2 * FORMA_VALUE)
             else:
